@@ -1,0 +1,8 @@
+config BR2_PACKAGE_PU32_GDBSERVER
+	bool "PU32 gdbserver"
+	depends on BR2_pu32
+	select BR2_PACKAGE_EXPAT
+	select BR2_PACKAGE_GMP
+	select BR2_PACKAGE_MPFR
+	help
+	  Install gdbserver on the target

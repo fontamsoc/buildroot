@@ -100,6 +100,7 @@ endchoice
 
 config BR2_TOOLCHAIN_BUILDROOT_LIBC
 	string
+	depends on !BR2_pu32
 	default "uclibc" if BR2_TOOLCHAIN_BUILDROOT_UCLIBC
 	default "glibc"  if BR2_TOOLCHAIN_BUILDROOT_GLIBC
 	default "musl"	 if BR2_TOOLCHAIN_BUILDROOT_MUSL
@@ -112,3 +113,9 @@ source "package/glibc/Config.in"
 source "package/binutils/Config.in.host"
 source "package/gcc/Config.in.host"
 endif
+
+source "package/pu32-gdbserver/Config.in"
+source "package/pu32-linux-headers/Config.in"
+source "package/pu32-glibc/Config.in"
+source "package/pu32-binutils/Config.in"
+source "package/pu32-gcc/Config.in"
