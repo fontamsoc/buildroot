@@ -1,0 +1,108 @@
+From 1c907fd61115c0cc6404f74da60c199272f27881 Mon Sep 17 00:00:00 2001
+From: William Tambe <tambewilliam@gmail.com>
+Date: Sat, 13 Aug 2022 23:50:30 -0500
+Subject: [PATCH] support FB_ACCEL_FONTAM_FBDEV
+
+---
+ libavdevice/fbdev_dec.c |  2 ++
+ libavdevice/fbdev_enc.c | 64 ++++++++++++++++++++++++++++++++++++++++-
+ 2 files changed, 65 insertions(+), 1 deletion(-)
+
+diff --git a/libavdevice/fbdev_dec.c b/libavdevice/fbdev_dec.c
+index 586caee..285f2ce 100644
+--- a/libavdevice/fbdev_dec.c
++++ b/libavdevice/fbdev_dec.c
+@@ -180,6 +180,8 @@ static int fbdev_read_packet(AVFormatContext *avctx, AVPacket *pkt)
+     if ((ret = av_new_packet(pkt, fbdev->frame_size)) < 0)
+         return ret;
+ 
++    // TODO: Use FBIOPAN_DISPLAY here ...
++
+     /* refresh fbdev->varinfo, visible data position may change at each call */
+     if (ioctl(fbdev->fd, FBIOGET_VSCREENINFO, &fbdev->varinfo) < 0) {
+         av_log(avctx, AV_LOG_WARNING,
+diff --git a/libavdevice/fbdev_enc.c b/libavdevice/fbdev_enc.c
+index 4191596..98d7fde 100644
+--- a/libavdevice/fbdev_enc.c
++++ b/libavdevice/fbdev_enc.c
+@@ -117,6 +117,11 @@ static int fbdev_write_packet(AVFormatContext *h, AVPacket *pkt)
+         av_log(h, AV_LOG_WARNING,
+                "Error refreshing variable info: %s\n", av_err2str(AVERROR(errno)));
+ 
++    if (fbdev->fixinfo.accel & FB_ACCEL_FONTAM_FBDEV) {
++        fbdev->varinfo.yoffset += fbdev->fixinfo.ypanstep;
++        fbdev->varinfo.yoffset %= fbdev->varinfo.yres_virtual;
++    }
++
+     fb_pix_fmt = ff_get_pixfmt_from_fb_varinfo(&fbdev->varinfo);
+ 
+     if (fb_pix_fmt != video_pix_fmt) {
+@@ -167,7 +172,64 @@ static int fbdev_write_packet(AVFormatContext *h, AVPacket *pkt)
+         }
+     }
+ 
+-    for (i = 0; i < disp_height; i++) {
++    if (fbdev->fixinfo.accel & FB_ACCEL_FONTAM_FBDEV) {
++        inline uint32_t* hwdrvfbdev_encblit (uint32_t *dst, uint32_t *src, unsigned long cnt) {
++            uint32_t px_hold;
++            unsigned long px_hold_cnt = 0;
++            while (cnt) {
++                uint32_t px_saved = (*src & 0xffffff);
++                if (!px_hold_cnt)
++                    px_hold = px_saved;
++                unsigned long px_saved_diff_hold = (px_saved != px_hold);
++                if (!px_saved_diff_hold)
++                    ++px_hold_cnt;
++                if (px_saved_diff_hold || cnt == 1 || px_hold_cnt == 0xff) {
++                    *dst = (((px_hold_cnt-2)<<24) | px_hold);
++                    px_hold_cnt = 0;
++                    ++dst;
++                }
++                if (!px_saved_diff_hold) {
++                    ++src;
++                    --cnt;
++                }
++            }
++            return dst;
++        }
++        inline uint32_t* hwdrvfbdev_encfill (uint32_t *dst, uint32_t pxval, unsigned long cnt) {
++            while (cnt) {
++                unsigned long _cnt;
++                if (cnt > 0xff) {
++                    _cnt = (0xff-2);
++                    cnt -= 0xff;
++                } else {
++                    _cnt = (cnt-2);
++                    cnt = 0;
++                }
++                *dst = ((_cnt<<24) | (pxval & 0xffffff));
++                ++dst;
++            }
++            return dst;
++        }
++        if (fbdev->varinfo.xres == video_width && fbdev->varinfo.yres == video_height) {
++            pout = hwdrvfbdev_encblit (pout, pin, video_width * video_height);
++            pin += (src_line_size * disp_height);
++        } else {
++            for (i = 0; i < disp_height; ++i) {
++                pout = hwdrvfbdev_encblit (pout, pin, bytes_to_copy/sizeof(uint32_t));
++                unsigned long pxcnt_remaining =
++                    ((fbdev->fixinfo.line_length - bytes_to_copy) / sizeof(uint32_t));
++                if (pxcnt_remaining)
++                    pout = hwdrvfbdev_encfill (pout, 0, pxcnt_remaining);
++                pin += src_line_size;
++            }
++            if (fbdev->varinfo.yres > disp_height)
++                hwdrvfbdev_encfill (pout, 0,
++                    ((fbdev->varinfo.yres - disp_height) * fbdev->varinfo.xres));
++        }
++        if (ioctl(fbdev->fd, FBIOPAN_DISPLAY, &fbdev->varinfo) < 0)
++            av_log(h, AV_LOG_WARNING,
++                   "Error panning display: %s\n", av_err2str(AVERROR(errno)));
++    } else for (i = 0; i < disp_height; ++i) {
+         memcpy(pout, pin, bytes_to_copy);
+         pout += fbdev->fixinfo.line_length;
+         pin  += src_line_size;
+-- 
+2.25.1
+
