@@ -1,0 +1,8 @@
+config BR2_PACKAGE_PU32_BINUTILS
+	bool "PU32 binutils"
+	depends on BR2_pu32
+	select BR2_PACKAGE_EXPAT
+	select BR2_PACKAGE_GMP
+	select BR2_PACKAGE_MPFR
+	help
+	  Install binutils on the target

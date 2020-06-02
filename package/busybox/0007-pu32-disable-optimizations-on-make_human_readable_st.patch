@@ -1,0 +1,26 @@
+From a270b716b5d9f8c677a9400f80f5273db6517b43 Mon Sep 17 00:00:00 2001
+From: William Tambe <tambewilliam@gmail.com>
+Date: Thu, 31 Aug 2023 11:32:40 -0500
+Subject: [PATCH] pu32: disable optimizations on make_human_readable_str()
+
+---
+ libbb/human_readable.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/libbb/human_readable.c b/libbb/human_readable.c
+index 09221a1..548b329 100644
+--- a/libbb/human_readable.c
++++ b/libbb/human_readable.c
+@@ -24,6 +24,9 @@
+  */
+ #include "libbb.h"
+ 
++#ifdef __PU32__
++__attribute__((optimize("O0"))) // used otherwise gives wrong result.
++#endif
+ const char* FAST_FUNC make_human_readable_str(unsigned long long val,
+ 	unsigned long block_size, unsigned long display_unit)
+ {
+-- 
+2.34.1
+

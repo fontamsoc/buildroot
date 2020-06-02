@@ -1,0 +1,105 @@
+From 4792c3b85b97e1a96a3280a17b55f45988f77fe9 Mon Sep 17 00:00:00 2001
+From: William Tambe <tambewilliam@gmail.com>
+Date: Sat, 2 Sep 2023 18:48:11 -0500
+Subject: [PATCH] pu32 adjustments
+
+---
+ pppd/Makefile.linux | 24 ++++++++++++++----------
+ pppd/pppcrypt.h     |  2 +-
+ 2 files changed, 15 insertions(+), 11 deletions(-)
+
+diff --git a/pppd/Makefile.linux b/pppd/Makefile.linux
+index ac8d5d0..66a9c86 100644
+--- a/pppd/Makefile.linux
++++ b/pppd/Makefile.linux
+@@ -15,26 +15,30 @@ INCDIR = $(DESTDIR)/include
+ 
+ TARGETS = pppd
+ 
+-PPPDSRCS = main.c magic.c fsm.c lcp.c ipcp.c upap.c chap-new.c md5.c ccp.c \
++PPPDSRCS = main.c magic.c fsm.c lcp.c ipcp.c upap.c chap-new.c ccp.c \
+ 	   ecp.c ipxcp.c auth.c options.c sys-linux.c md4.c chap_ms.c \
+ 	   demand.c utils.c tty.c eap.c chap-md5.c session.c
+ 
+ HEADERS = ccp.h session.h chap-new.h ecp.h fsm.h ipcp.h \
+-	ipxcp.h lcp.h magic.h md5.h patchlevel.h pathnames.h pppd.h \
++	ipxcp.h lcp.h magic.h patchlevel.h pathnames.h pppd.h \
+ 	upap.h eap.h
+ 
+ MANPAGES = pppd.8
+-PPPDOBJS = main.o magic.o fsm.o lcp.o ipcp.o upap.o chap-new.o md5.o ccp.o \
++PPPDOBJS = main.o magic.o fsm.o lcp.o ipcp.o upap.o chap-new.o ccp.o \
+ 	   ecp.o auth.o options.o demand.o utils.o sys-linux.o ipxcp.o tty.o \
+ 	   eap.o chap-md5.o session.o
+ 
++#PPPDSRCS += md5.c
++#HEADERS += md5.h
++#PPPDOBJS += md5.o
++
+ #
+ # include dependencies if present
+ ifeq (.depend,$(wildcard .depend))
+ include .depend
+ endif
+ 
+-LIBS = -lrt
++LIBS = -lrt -latomic
+ 
+ # Uncomment the next line to include support for Microsoft's
+ # MS-CHAP authentication protocol.  Also, edit plugins/radius/Makefile.linux.
+@@ -123,9 +127,9 @@ else
+ # OpenSSL has an integrated version of SHA-1, and its implementation
+ # is incompatible with this local SHA-1 implementation.  We must use
+ # one or the other, not both.
+-PPPDSRCS += sha1.c
+-HEADERS += sha1.h
+-PPPDOBJS += sha1.o
++#PPPDSRCS += sha1.c
++#HEADERS += sha1.h
++#PPPDOBJS += sha1.o
+ endif
+ 
+ # EAP-TLS
+@@ -155,7 +159,7 @@ endif
+ 
+ ifdef NEEDDES
+ ifndef USE_CRYPT
+-CFLAGS   += -I$(shell $(CC) --print-sysroot)/usr/include/openssl
++CFLAGS   += -I$(shell $(CC) --print-sysroot)/usr/include
+ NEEDCRYPTOLIB = y
+ else
+ CFLAGS   += -DUSE_CRYPT=1
+@@ -165,7 +169,7 @@ HEADERS += pppcrypt.h
+ endif
+ 
+ ifdef NEEDCRYPTOLIB
+-LIBS     += -lcrypto
++LIBS     += -lcrypto -lz
+ endif
+ 
+ # For "Pluggable Authentication Modules", see ftp.redhat.com:/pub/pam/.
+@@ -245,7 +249,7 @@ install: pppd
+ 	$(INSTALL) -c -m 444 pppd.8 $(MANDIR)
+ 
+ pppd: $(PPPDOBJS)
+-	$(CC) $(CFLAGS) $(LDFLAGS) $(LDFLAGS_PLUGIN) -o pppd $(PPPDOBJS) $(LIBS)
++	$(CC) $(CFLAGS) $(LDFLAGS) $(LDFLAGS_PLUGIN) -o pppd $(PPPDOBJS) -Wl,--start-group $(LIBS) -Wl,--end-group
+ 
+ srp-entry:	srp-entry.c
+ 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ srp-entry.c $(LIBS)
+diff --git a/pppd/pppcrypt.h b/pppd/pppcrypt.h
+index 364940e..0f71bb3 100644
+--- a/pppd/pppcrypt.h
++++ b/pppd/pppcrypt.h
+@@ -38,7 +38,7 @@
+ #endif
+ 
+ #ifndef USE_CRYPT
+-#include <des.h>
++#include <openssl/des.h>
+ #endif
+ 
+ extern bool	DesSetkey(u_char *);
+-- 
+2.34.1
+
