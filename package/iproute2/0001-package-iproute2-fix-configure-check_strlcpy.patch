@@ -1,0 +1,25 @@
+From 22675faa1959bdda870a973f62063dc5e1162894 Mon Sep 17 00:00:00 2001
+From: William Tambe <tambewilliam@gmail.com>
+Date: Tue, 21 Jul 2020 23:44:29 -0500
+Subject: [PATCH] package/iproute2: fix configure check_strlcpy()
+
+---
+ configure | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/configure b/configure
+index f415bf4..a64c360 100755
+--- a/configure
++++ b/configure
+@@ -297,7 +297,7 @@ int main(int argc, char **argv) {
+ 	return 0;
+ }
+ EOF
+-    if $CC -I$INCLUDE -o $TMPDIR/strtest $TMPDIR/strtest.c >/dev/null 2>&1; then
++    if $CC -static -I$INCLUDE -o $TMPDIR/strtest $TMPDIR/strtest.c >/dev/null 2>&1; then
+ 	echo "no"
+     else
+ 	if ${PKG_CONFIG} libbsd --exists; then
+-- 
+2.25.1
+

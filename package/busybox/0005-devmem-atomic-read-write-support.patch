@@ -1,0 +1,104 @@
+From 59c68f2741924ae8b76768eed703203852c42bd1 Mon Sep 17 00:00:00 2001
+From: William Tambe <tambewilliam@gmail.com>
+Date: Fri, 17 Dec 2021 10:00:56 -0600
+Subject: [PATCH] devmem atomic read-write support
+
+---
+ miscutils/devmem.c | 41 +++++++++++++++++++++++++++++++++++------
+ 1 file changed, 35 insertions(+), 6 deletions(-)
+
+diff --git a/miscutils/devmem.c b/miscutils/devmem.c
+index f9f0276..6258705 100644
+--- a/miscutils/devmem.c
++++ b/miscutils/devmem.c
+@@ -15,11 +15,12 @@
+ //kbuild:lib-$(CONFIG_DEVMEM) += devmem.o
+ 
+ //usage:#define devmem_trivial_usage
+-//usage:	"ADDRESS [WIDTH [VALUE]]"
++//usage:	"ADDRESS [WIDTH [@][VALUE]]"
+ //usage:#define devmem_full_usage "\n\n"
+ //usage:       "Read/write from physical address\n"
+ //usage:     "\n	ADDRESS	Address to act upon"
+ //usage:     "\n	WIDTH	Width (8/16/...)"
++//usage:     "\n	@	Atomic read-write"
+ //usage:     "\n	VALUE	Data to be written"
+ 
+ #include "libbb.h"
+@@ -34,6 +35,7 @@ int devmem_main(int argc UNUSED_PARAM, char **argv)
+ 	unsigned page_size, mapped_size, offset_in_page;
+ 	int fd;
+ 	unsigned width = 8 * sizeof(int);
++	unsigned do_atomic = 0;
+ 
+ 	/* devmem ADDRESS [WIDTH [VALUE]] */
+ // TODO: options?
+@@ -65,8 +67,13 @@ int devmem_main(int argc UNUSED_PARAM, char **argv)
+ 			width = sizes[width];
+ 		}
+ 		/* VALUE */
+-		if (argv[3])
++		if (argv[3]) {
++			if ((do_atomic = (*argv[3] == '@'))) {
++				if (!*++argv[3])
++					bb_show_usage();
++			}
+ 			writeval = bb_strtoull(argv[3], NULL, 0);
++		}
+ 	} else { /* argv[2] == NULL */
+ 		/* make argv[3] to be a valid thing to fetch */
+ 		argv--;
+@@ -120,24 +127,46 @@ int devmem_main(int argc UNUSED_PARAM, char **argv)
+ 	} else {
+ 		switch (width) {
+ 		case 8:
+-			*(volatile uint8_t*)virt_addr = writeval;
++			if (do_atomic)
++				asm volatile ("ldst8 %0, %1" : "+r" (writeval) : "r"  (virt_addr));
++			else {
++				*(volatile uint8_t*)virt_addr = writeval;
+ //			read_result = *(volatile uint8_t*)virt_addr;
++			}
+ 			break;
+ 		case 16:
+-			*(volatile uint16_t*)virt_addr = writeval;
++			if (do_atomic)
++				asm volatile ("ldst16 %0, %1" : "+r" (writeval) : "r"  (virt_addr));
++			else {
++				*(volatile uint16_t*)virt_addr = writeval;
+ //			read_result = *(volatile uint16_t*)virt_addr;
++			}
+ 			break;
+ 		case 32:
+-			*(volatile uint32_t*)virt_addr = writeval;
++			if (do_atomic)
++				asm volatile ("ldst32 %0, %1" : "+r" (writeval) : "r"  (virt_addr));
++			else {
++				*(volatile uint32_t*)virt_addr = writeval;
+ //			read_result = *(volatile uint32_t*)virt_addr;
++			}
+ 			break;
+ 		case 64:
+-			*(volatile uint64_t*)virt_addr = writeval;
++			if (do_atomic) {
++				#if __SIZEOF_POINTER__ >= 8
++				asm volatile ("ldst64 %0, %1" : "+r" (writeval) : "r"  (virt_addr));
++				#else
++				bb_simple_error_msg_and_die("bad width");
++				#endif
++			} else {
++				*(volatile uint64_t*)virt_addr = writeval;
+ //			read_result = *(volatile uint64_t*)virt_addr;
++			}
+ 			break;
+ 		default:
+ 			bb_simple_error_msg_and_die("bad width");
+ 		}
++		if (do_atomic)
++			printf("0x%0*llX\n", (width >> 2), (unsigned long long)writeval);
+ //		printf("Written 0x%llX; readback 0x%llX\n",
+ //				(unsigned long long)writeval,
+ //				(unsigned long long)read_result);
+-- 
+2.25.1
+
