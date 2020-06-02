@@ -1,19 +1,23 @@
 export PATH=@PATH@
 
 if [ "$PS1" ]; then
-	if [ "`id -u`" -eq 0 ]; then
-		export PS1='# '
+	# Display a red prompt when root, otherwise display a green prompt.
+	if [ ${EUID} -eq 0 ]; then
+		export PS1='\e[01;31m\]\u@\h\e[00m\]:\e[01;34m\]\w\e[00m\]\n# '
 	else
-		export PS1='$ '
+		export PS1='\e[01;32m\]\u@\h\e[00m\]:\e[01;34m\]\w\e[00m\]\n\$ '
 	fi
 fi
 
-export EDITOR='/bin/vi'
+export PAGER='/bin/less '
+export EDITOR='/bin/nano'
 
 # Source configuration files from /etc/profile.d
-for i in /etc/profile.d/*.sh ; do
+for i in /etc/profile.d/[a-zA-Z_]*.sh ; do
 	if [ -r "$i" ]; then
 		. $i
 	fi
 done
 unset i
+
+[ -f ~/.bashrc ] && source ~/.bashrc
