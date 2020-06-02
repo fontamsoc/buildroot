@@ -1,0 +1,3 @@
+#!/bin/bash
+[ ${EUID} -eq 0 ] && cd /root/
+exec -a -bash bash

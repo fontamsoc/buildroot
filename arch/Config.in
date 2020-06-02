@@ -208,6 +208,12 @@ config BR2_powerpc64le
 	  http://www.power.org/
 	  http://en.wikipedia.org/wiki/Powerpc
 
+config BR2_pu32
+	bool "PU32"
+	select BR2_ARCH_HAS_MMU_MANDATORY
+	help
+	  PU32 is a RISC architecture created by William Fonkou Tambe.
+
 config BR2_riscv
 	bool "RISCV"
 	select BR2_ARCH_HAS_MMU_MANDATORY
@@ -464,6 +470,10 @@ endif
 
 if BR2_powerpc || BR2_powerpc64 || BR2_powerpc64le
 source "arch/Config.in.powerpc"
+endif
+
+if BR2_pu32
+source "arch/Config.in.pu32"
 endif
 
 if BR2_riscv

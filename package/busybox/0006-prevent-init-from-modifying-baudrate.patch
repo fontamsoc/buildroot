@@ -1,0 +1,31 @@
+From a8b03c960475752161d11d08edb395a3679a512a Mon Sep 17 00:00:00 2001
+From: William Tambe <tambewilliam@gmail.com>
+Date: Fri, 4 Mar 2022 10:49:45 -0600
+Subject: [PATCH] prevent init from modifying baudrate
+
+---
+ init/init.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/init/init.c b/init/init.c
+index efab5dc..c2633dd 100644
+--- a/init/init.c
++++ b/init/init.c
+@@ -362,10 +362,10 @@ static void set_sane_term(void)
+ 
+ 	/* Make it be sane */
+ /* On systems where the baud rate is stored in a separate field, we can safely disable these. */
+-#ifndef CBAUD
+-# define CBAUD 0
+-# define CBAUDEX 0
+-#endif
++#undef CBAUD
++#undef CBAUDEX
++#define CBAUD 0
++#define CBAUDEX 0
+ /* Added CRTSCTS to fix Debian bug 528560 */
+ #ifndef CRTSCTS
+ # define CRTSCTS 0
+-- 
+2.25.1
+

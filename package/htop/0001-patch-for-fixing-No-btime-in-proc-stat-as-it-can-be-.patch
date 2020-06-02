@@ -1,0 +1,27 @@
+From 4f7e67607198a619f1a75ea23e021996d80ab8b4 Mon Sep 17 00:00:00 2001
+From: William Tambe <tambewilliam@gmail.com>
+Date: Mon, 24 May 2021 13:30:37 -0500
+Subject: [PATCH] patch for fixing "No btime in /proc/stat", as it can be null
+
+---
+ linux/LinuxProcessList.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/linux/LinuxProcessList.c b/linux/LinuxProcessList.c
+index 434d070..2e2c6bb 100644
+--- a/linux/LinuxProcessList.c
++++ b/linux/LinuxProcessList.c
+@@ -239,8 +239,8 @@ ProcessList* ProcessList_new(UsersTable* usersTable, Hashtable* pidMatchList, ui
+       }
+       fclose(statfile);
+ 
+-      if (!btime)
+-         CRT_fatalError("No btime in " PROCSTATFILE);
++      //if (!btime)
++      //   CRT_fatalError("No btime in " PROCSTATFILE);
+    }
+ 
+    // Initialize CPU count
+-- 
+2.25.1
+

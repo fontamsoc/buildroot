@@ -90,6 +90,7 @@ define DHCP_INSTALL_CLIENT
 endef
 endif
 
+ifeq ($(BR2_PACKAGE_DHCP_SERVER),y)
 # Options don't matter, scripts won't start if binaries aren't there
 define DHCP_INSTALL_INIT_SYSV
 	$(INSTALL) -m 0755 -D package/dhcp/S80dhcp-server \
@@ -98,7 +99,6 @@ define DHCP_INSTALL_INIT_SYSV
 		$(TARGET_DIR)/etc/init.d/S80dhcp-relay
 endef
 
-ifeq ($(BR2_PACKAGE_DHCP_SERVER),y)
 define DHCP_INSTALL_INIT_SYSTEMD
 	$(INSTALL) -D -m 644 package/dhcp/dhcpd.service \
 		$(TARGET_DIR)/usr/lib/systemd/system/dhcpd.service

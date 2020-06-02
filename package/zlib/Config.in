@@ -6,6 +6,7 @@ config BR2_PACKAGE_ZLIB_NG_ARCH_SUPPORTS
 	default y if BR2_powerpc || BR2_powerpc64 || BR2_powerpc64le
 	default y if BR2_s390x
 	default y if BR2_x86_64
+	default y if BR2_pu32
 
 config BR2_PACKAGE_ZLIB
 	bool "zlib support"
