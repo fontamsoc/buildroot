@@ -4,13 +4,14 @@
 #
 ################################################################################
 
-STRACE_VERSION = 6.1
+STRACE_VERSION = 6.5
 STRACE_SOURCE = strace-$(STRACE_VERSION).tar.xz
 STRACE_SITE = https://github.com/strace/strace/releases/download/v$(STRACE_VERSION)
 STRACE_LICENSE = LGPL-2.1+
 STRACE_LICENSE_FILES = COPYING LGPL-2.1-or-later
 STRACE_CPE_ID_VENDOR = strace_project
 STRACE_CONF_OPTS = --enable-mpers=no
+# --enable-bundled # to use when kernel is too new.
 
 ifeq ($(BR2_PACKAGE_LIBUNWIND),y)
 STRACE_DEPENDENCIES += libunwind
@@ -33,6 +34,10 @@ define STRACE_REMOVE_STRACE_GRAPH
 endef
 
 STRACE_POST_INSTALL_TARGET_HOOKS += STRACE_REMOVE_STRACE_GRAPH
+endif
+
+ifeq ($(BR2_STATIC_LIBS),y)
+STRACE_CONF_ENV += LIBS="-lpthread"
 endif
 
 $(eval $(autotools-package))

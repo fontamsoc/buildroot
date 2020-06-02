@@ -1,0 +1,500 @@
+From 60db0b0e668d1716dd40cae26436b061716dc1ee Mon Sep 17 00:00:00 2001
+From: William Tambe <tambewilliam@gmail.com>
+Date: Wed, 14 Jun 2023 19:45:21 -0500
+Subject: [PATCH] PU32 support
+
+---
+ configure                         |  7 +++++++
+ configure.ac                      |  4 ++++
+ src/Makefile.am                   | 11 +++++++++++
+ src/Makefile.in                   | 11 +++++++++++
+ src/clone.c                       |  2 +-
+ src/config.h.in                   |  3 +++
+ src/defs.h                        |  3 +++
+ src/linux/pu32/arch_defs_.h       |  1 +
+ src/linux/pu32/arch_regs.c        | 12 ++++++++++++
+ src/linux/pu32/get_error.c        | 18 ++++++++++++++++++
+ src/linux/pu32/get_scno.c         | 14 ++++++++++++++
+ src/linux/pu32/get_syscall_args.c | 19 +++++++++++++++++++
+ src/linux/pu32/ioctls_arch0.h     |  1 +
+ src/linux/pu32/ioctls_inc0.h      |  1 +
+ src/linux/pu32/raw_syscall.h      | 27 +++++++++++++++++++++++++++
+ src/linux/pu32/set_error.c        | 20 ++++++++++++++++++++
+ src/linux/pu32/set_scno.c         | 15 +++++++++++++++
+ src/linux/pu32/syscallent.h       |  2 ++
+ src/xlat/audit_arch.h             | 18 ++++++++++++++++++
+ src/xlat/audit_arch.in            |  1 +
+ src/xlat/elf_em.h                 | 28 ++++++++++++++++++++++++++++
+ src/xlat/elf_em.in                |  1 +
+ 22 files changed, 218 insertions(+), 1 deletion(-)
+ create mode 100644 src/linux/pu32/arch_defs_.h
+ create mode 100644 src/linux/pu32/arch_regs.c
+ create mode 100644 src/linux/pu32/get_error.c
+ create mode 100644 src/linux/pu32/get_scno.c
+ create mode 100644 src/linux/pu32/get_syscall_args.c
+ create mode 100644 src/linux/pu32/ioctls_arch0.h
+ create mode 100644 src/linux/pu32/ioctls_inc0.h
+ create mode 100644 src/linux/pu32/raw_syscall.h
+ create mode 100644 src/linux/pu32/set_error.c
+ create mode 100644 src/linux/pu32/set_scno.c
+ create mode 100644 src/linux/pu32/syscallent.h
+
+diff --git a/configure b/configure
+index a9a2df0..4a003b7 100755
+--- a/configure
++++ b/configure
+@@ -6144,6 +6144,13 @@ $as_echo "#define POWERPC64 1" >>confdefs.h
+ 			;;
+ 		esac
+ 	fi
++
++	;;
++pu32*)
++	arch=pu32
++
++$as_echo "#define PU32 1" >>confdefs.h
++
+ 	;;
+ riscv64*)
+ 	arch=riscv64
+diff --git a/configure.ac b/configure.ac
+index 68555bc..e80ea3d 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -169,6 +169,10 @@ powerpc*)
+ 		esac
+ 	fi
+ 	;;
++pu32*)
++	arch=pu32
++	AC_DEFINE([PU32], 1, [Define for the PU32 architecture])
++	;;
+ riscv64*)
+ 	arch=riscv64
+ 	karch=riscv
+diff --git a/src/Makefile.am b/src/Makefile.am
+index 03da75f..87e13b1 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -821,6 +821,17 @@ EXTRA_DIST =				\
+ 	linux/powerpc64le/set_scno.c	\
+ 	linux/powerpc64le/syscallent.h	\
+ 	linux/powerpc64le/userent.h	\
++	linux/pu32/arch_defs_.h		\
++	linux/pu32/arch_regs.c		\
++	linux/pu32/get_error.c		\
++	linux/pu32/get_scno.c		\
++	linux/pu32/get_syscall_args.c	\
++	linux/pu32/ioctls_arch0.h	\
++	linux/pu32/ioctls_inc0.h	\
++	linux/pu32/raw_syscall.h	\
++	linux/pu32/set_error.c		\
++	linux/pu32/set_scno.c		\
++	linux/pu32/syscallent.h		\
+ 	linux/riscv64/arch_defs_.h		\
+ 	linux/riscv64/arch_prstatus_regset.c \
+ 	linux/riscv64/arch_prstatus_regset.h \
+diff --git a/src/Makefile.in b/src/Makefile.in
+index e46bb29..5c1c087 100644
+--- a/src/Makefile.in
++++ b/src/Makefile.in
+@@ -2415,6 +2415,17 @@ EXTRA_DIST = \
+ 	linux/powerpc64le/set_scno.c	\
+ 	linux/powerpc64le/syscallent.h	\
+ 	linux/powerpc64le/userent.h	\
++	linux/pu32/arch_defs_.h		\
++	linux/pu32/arch_regs.c		\
++	linux/pu32/get_error.c		\
++	linux/pu32/get_scno.c		\
++	linux/pu32/get_syscall_args.c	\
++	linux/pu32/ioctls_arch0.h	\
++	linux/pu32/ioctls_inc0.h	\
++	linux/pu32/raw_syscall.h	\
++	linux/pu32/set_error.c		\
++	linux/pu32/set_scno.c		\
++	linux/pu32/syscallent.h		\
+ 	linux/riscv64/arch_defs_.h		\
+ 	linux/riscv64/arch_prstatus_regset.c \
+ 	linux/riscv64/arch_prstatus_regset.h \
+diff --git a/src/clone.c b/src/clone.c
+index 2c430f8..3789983 100644
+--- a/src/clone.c
++++ b/src/clone.c
+@@ -39,7 +39,7 @@
+ # define ARG_PTID	2
+ # define ARG_CTID	((current_personality != 1) ? 3 : 4)
+ # define ARG_TLS	((current_personality != 1) ? 4 : 3)
+-#elif defined ALPHA || defined TILE || defined OR1K || defined CSKY
++#elif defined ALPHA || defined TILE || defined OR1K || defined CSKY || defined PU32
+ # define ARG_FLAGS	0
+ # define ARG_STACK	1
+ # define ARG_PTID	2
+diff --git a/src/config.h.in b/src/config.h.in
+index 7b01012..55e1522 100644
+--- a/src/config.h.in
++++ b/src/config.h.in
+@@ -1505,3 +1505,6 @@
+ 
+ /* Define to `int' if <sys/types.h> doesn't define. */
+ #undef uid_t
++
++/* Define for the PU32 architecture */
++#undef PU32
+diff --git a/src/defs.h b/src/defs.h
+index f90763d..e5d0d8c 100644
+--- a/src/defs.h
++++ b/src/defs.h
+@@ -33,6 +33,9 @@
+ # include <time.h>
+ # include <sys/time.h>
+ 
++#include <bits/xopen_lim.h>
++#include <linux/limits.h>
++
+ # include "arch_defs.h"
+ # include "error_prints.h"
+ # include "gcc_compat.h"
+diff --git a/src/linux/pu32/arch_defs_.h b/src/linux/pu32/arch_defs_.h
+new file mode 100644
+index 0000000..901e906
+--- /dev/null
++++ b/src/linux/pu32/arch_defs_.h
+@@ -0,0 +1 @@
++#define PERSONALITY0_AUDIT_ARCH { AUDIT_ARCH_PU32, 0 }
+diff --git a/src/linux/pu32/arch_regs.c b/src/linux/pu32/arch_regs.c
+new file mode 100644
+index 0000000..181ce27
+--- /dev/null
++++ b/src/linux/pu32/arch_regs.c
+@@ -0,0 +1,12 @@
++/*
++ * Copyright (c) 2015-2021 The strace developers.
++ * All rights reserved.
++ *
++ * SPDX-License-Identifier: LGPL-2.1-or-later
++ */
++
++static struct pt_regs pu32_regs;
++
++#define ARCH_REGS_FOR_GETREGSET pu32_regs
++#define ARCH_PC_REG pu32_regs.pc
++#define ARCH_SP_REG pu32_regs.sp
+diff --git a/src/linux/pu32/get_error.c b/src/linux/pu32/get_error.c
+new file mode 100644
+index 0000000..ed424e6
+--- /dev/null
++++ b/src/linux/pu32/get_error.c
+@@ -0,0 +1,18 @@
++/*
++ * Copyright (c) 2015-2021 The strace developers.
++ * All rights reserved.
++ *
++ * SPDX-License-Identifier: LGPL-2.1-or-later
++ */
++#include "negated_errno.h"
++
++static void
++arch_get_error(struct tcb *tcp, const bool check_errno)
++{
++	if (check_errno && is_negated_errno(pu32_regs.r1)) {
++		tcp->u_rval = -1;
++		tcp->u_error = -pu32_regs.r1;
++	} else {
++		tcp->u_rval = pu32_regs.r1;
++	}
++}
+diff --git a/src/linux/pu32/get_scno.c b/src/linux/pu32/get_scno.c
+new file mode 100644
+index 0000000..0a7ac1f
+--- /dev/null
++++ b/src/linux/pu32/get_scno.c
+@@ -0,0 +1,14 @@
++/*
++ * Copyright (c) 2015-2021 The strace developers.
++ * All rights reserved.
++ *
++ * SPDX-License-Identifier: LGPL-2.1-or-later
++ */
++
++/* Return codes: 1 - ok, 0 - ignore, other - error. */
++static int
++arch_get_scno(struct tcb *tcp)
++{
++	tcp->scno = pu32_regs.sr;
++	return 1;
++}
+diff --git a/src/linux/pu32/get_syscall_args.c b/src/linux/pu32/get_syscall_args.c
+new file mode 100644
+index 0000000..1535c50
+--- /dev/null
++++ b/src/linux/pu32/get_syscall_args.c
+@@ -0,0 +1,19 @@
++/*
++ * Copyright (c) 2015-2021 The strace developers.
++ * All rights reserved.
++ *
++ * SPDX-License-Identifier: LGPL-2.1-or-later
++ */
++
++/* Return -1 on error or 1 on success (never 0!). */
++static int
++arch_get_syscall_args(struct tcb *tcp)
++{
++	tcp->u_arg[0] = pu32_regs.r1;
++	tcp->u_arg[1] = pu32_regs.r2;
++	tcp->u_arg[2] = pu32_regs.r3;
++	tcp->u_arg[3] = pu32_regs.r4;
++	tcp->u_arg[4] = pu32_regs.r5;
++	tcp->u_arg[5] = pu32_regs.r6;
++	return 1;
++}
+diff --git a/src/linux/pu32/ioctls_arch0.h b/src/linux/pu32/ioctls_arch0.h
+new file mode 100644
+index 0000000..8b7ac89
+--- /dev/null
++++ b/src/linux/pu32/ioctls_arch0.h
+@@ -0,0 +1 @@
++/* Generated by ioctls_gen.sh from definitions found in $linux/arch/csky/include/ tree. */
+diff --git a/src/linux/pu32/ioctls_inc0.h b/src/linux/pu32/ioctls_inc0.h
+new file mode 100644
+index 0000000..a72f85c
+--- /dev/null
++++ b/src/linux/pu32/ioctls_inc0.h
+@@ -0,0 +1 @@
++#include "../32/ioctls_inc.h"
+diff --git a/src/linux/pu32/raw_syscall.h b/src/linux/pu32/raw_syscall.h
+new file mode 100644
+index 0000000..4a84e83
+--- /dev/null
++++ b/src/linux/pu32/raw_syscall.h
+@@ -0,0 +1,27 @@
++/*
++ * Copyright (c) 2018-2021 The strace developers.
++ * All rights reserved.
++ *
++ * SPDX-License-Identifier: LGPL-2.1-or-later
++ */
++
++#ifndef STRACE_RAW_SYSCALL_H
++# define STRACE_RAW_SYSCALL_H
++
++# include "kernel_types.h"
++
++static inline kernel_ulong_t
++raw_syscall_0(const kernel_ulong_t nr, kernel_ulong_t *err)
++{
++	*err = 0;
++	register kernel_ulong_t a0 __asm__("%sr") = nr;
++	register kernel_ulong_t a1 __asm__("%1");
++	__asm__ __volatile__("syscall"
++			     : "=a"(a1)
++			     : "r"(a0)
++			     : "memory");
++	return a0;
++}
++# define raw_syscall_0 raw_syscall_0
++
++#endif /* !STRACE_RAW_SYSCALL_H */
+diff --git a/src/linux/pu32/set_error.c b/src/linux/pu32/set_error.c
+new file mode 100644
+index 0000000..606176b
+--- /dev/null
++++ b/src/linux/pu32/set_error.c
+@@ -0,0 +1,20 @@
++/*
++ * Copyright (c) 2016-2021 The strace developers.
++ * All rights reserved.
++ *
++ * SPDX-License-Identifier: LGPL-2.1-or-later
++ */
++
++static int
++arch_set_error(struct tcb *tcp)
++{
++	pu32_regs.r1 = -tcp->u_error;
++	return set_regs(tcp->pid);
++}
++
++static int
++arch_set_success(struct tcb *tcp)
++{
++	pu32_regs.r1 = tcp->u_rval;
++	return set_regs(tcp->pid);
++}
+diff --git a/src/linux/pu32/set_scno.c b/src/linux/pu32/set_scno.c
+new file mode 100644
+index 0000000..7eccafd
+--- /dev/null
++++ b/src/linux/pu32/set_scno.c
+@@ -0,0 +1,15 @@
++/*
++ * Copyright (c) 2016-2021 The strace developers.
++ * All rights reserved.
++ *
++ * SPDX-License-Identifier: LGPL-2.1-or-later
++ */
++
++static int
++arch_set_scno(struct tcb *tcp, kernel_ulong_t scno)
++{
++	if (ptrace_syscall_info_is_valid() && get_regs(tcp) < 0)
++		return -1;
++	pu32_regs.sr = scno;
++	return set_regs(tcp->pid);
++}
+diff --git a/src/linux/pu32/syscallent.h b/src/linux/pu32/syscallent.h
+new file mode 100644
+index 0000000..cb09112
+--- /dev/null
++++ b/src/linux/pu32/syscallent.h
+@@ -0,0 +1,2 @@
++#include "../32/syscallent.h"
++/* [244 ... 259] are arch specific */
+diff --git a/src/xlat/audit_arch.h b/src/xlat/audit_arch.h
+index db085b8..b389186 100644
+--- a/src/xlat/audit_arch.h
++++ b/src/xlat/audit_arch.h
+@@ -271,6 +271,13 @@ DIAG_POP_IGNORE_TAUTOLOGICAL_COMPARE
+ #else
+ # define AUDIT_ARCH_PPC64LE (EM_PPC64|__AUDIT_ARCH_64BIT|__AUDIT_ARCH_LE)
+ #endif
++#if defined(AUDIT_ARCH_PU32) || (defined(HAVE_DECL_AUDIT_ARCH_PU32) && HAVE_DECL_AUDIT_ARCH_PU32)
++DIAG_PUSH_IGNORE_TAUTOLOGICAL_COMPARE
++static_assert((AUDIT_ARCH_PU32) == ((EM_PU32)), "AUDIT_ARCH_PU32 != (EM_PU32)");
++DIAG_POP_IGNORE_TAUTOLOGICAL_COMPARE
++#else
++# define AUDIT_ARCH_PU32 (EM_PU32)
++#endif
+ #if defined(AUDIT_ARCH_RISCV32) || (defined(HAVE_DECL_AUDIT_ARCH_RISCV32) && HAVE_DECL_AUDIT_ARCH_RISCV32)
+ DIAG_PUSH_IGNORE_TAUTOLOGICAL_COMPARE
+ static_assert((AUDIT_ARCH_RISCV32) == ((EM_RISCV|__AUDIT_ARCH_LE)), "AUDIT_ARCH_RISCV32 != (EM_RISCV|__AUDIT_ARCH_LE)");
+@@ -570,6 +577,9 @@ static const struct xlat_data audit_arch_xdata[] = {
+  XLAT(AUDIT_ARCH_XTENSA),
+  #define XLAT_VAL_53 ((unsigned) (AUDIT_ARCH_XTENSA))
+  #define XLAT_STR_53 STRINGIFY(AUDIT_ARCH_XTENSA)
++ XLAT(AUDIT_ARCH_PU32),
++ #define XLAT_VAL_54 ((unsigned) (AUDIT_ARCH_PU32))
++ #define XLAT_STR_54 STRINGIFY(AUDIT_ARCH_PU32)
+ };
+ const struct xlat audit_arch[1] = { {
+  .data = audit_arch_xdata,
+@@ -737,6 +747,9 @@ const struct xlat audit_arch[1] = { {
+ #  endif
+ #  ifdef XLAT_VAL_53
+   | XLAT_VAL_53
++#  endif
++#  ifdef XLAT_VAL_54
++  | XLAT_VAL_54
+ #  endif
+   ,
+  .flags_strsz = 0
+@@ -901,6 +914,9 @@ const struct xlat audit_arch[1] = { {
+ #  endif
+ #  ifdef XLAT_STR_53
+   + sizeof(XLAT_STR_53)
++#  endif
++#  ifdef XLAT_STR_54
++  + sizeof(XLAT_STR_54)
+ #  endif
+   ,
+ } };
+@@ -1014,6 +1030,8 @@ DIAG_POP_IGNORE_TAUTOLOGICAL_CONSTANT_COMPARE
+ #  undef XLAT_VAL_52
+ #  undef XLAT_STR_53
+ #  undef XLAT_VAL_53
++#  undef XLAT_STR_54
++#  undef XLAT_VAL_54
+ # endif /* !IN_MPERS */
+ 
+ #endif /* !XLAT_MACROS_ONLY */
+diff --git a/src/xlat/audit_arch.in b/src/xlat/audit_arch.in
+index 0760eb7..743e238 100644
+--- a/src/xlat/audit_arch.in
++++ b/src/xlat/audit_arch.in
+@@ -45,6 +45,7 @@ AUDIT_ARCH_PARISC64	(EM_PARISC|__AUDIT_ARCH_64BIT)
+ AUDIT_ARCH_PPC		(EM_PPC)
+ AUDIT_ARCH_PPC64	(EM_PPC64|__AUDIT_ARCH_64BIT)
+ AUDIT_ARCH_PPC64LE	(EM_PPC64|__AUDIT_ARCH_64BIT|__AUDIT_ARCH_LE)
++AUDIT_ARCH_PU32		(EM_PU32)
+ AUDIT_ARCH_RISCV32	(EM_RISCV|__AUDIT_ARCH_LE)
+ AUDIT_ARCH_RISCV64	(EM_RISCV|__AUDIT_ARCH_64BIT|__AUDIT_ARCH_LE)
+ AUDIT_ARCH_S390		(EM_S390)
+diff --git a/src/xlat/elf_em.h b/src/xlat/elf_em.h
+index 764c123..c5ccaad 100644
+--- a/src/xlat/elf_em.h
++++ b/src/xlat/elf_em.h
+@@ -3199,6 +3199,23 @@ static_assert((unsigned long long) (EM_CYGNUS_MN10300)
+ #undef XLAT_PREV_VAL
+ #define XLAT_PREV_VAL (EM_CYGNUS_MN10300)
+ #endif
++#if defined(EM_PU32) || (defined(HAVE_DECL_EM_PU32) && HAVE_DECL_EM_PU32)
++DIAG_PUSH_IGNORE_TAUTOLOGICAL_COMPARE
++static_assert((EM_PU32) == (0xdeed), "EM_PU32 != 0xdeed");
++DIAG_POP_IGNORE_TAUTOLOGICAL_COMPARE
++#else
++# define EM_PU32 0xdeed
++#endif
++#if defined(EM_PU32) || (defined(HAVE_DECL_EM_PU32) && HAVE_DECL_EM_PU32)
++#if defined XLAT_PREV_VAL
++static_assert((unsigned long long) (EM_PU32)
++      > (unsigned long long) (XLAT_PREV_VAL),
++      "Incorrect order in #sorted xlat: EM_PU32"
++      " is not larger than the previous value");
++#endif
++#undef XLAT_PREV_VAL
++#define XLAT_PREV_VAL (EM_PU32)
++#endif
+ #undef XLAT_PREV_VAL
+ 
+ #ifndef XLAT_MACROS_ONLY
+@@ -3789,6 +3806,9 @@ static const struct xlat_data elf_em_xdata[] = {
+  XLAT(EM_CYGNUS_MN10300),
+  #define XLAT_VAL_187 ((unsigned) (EM_CYGNUS_MN10300))
+  #define XLAT_STR_187 STRINGIFY(EM_CYGNUS_MN10300)
++ XLAT(EM_PU32),
++ #define XLAT_VAL_188 ((unsigned) (EM_PU32))
++ #define XLAT_STR_188 STRINGIFY(EM_PU32)
+ };
+ #  if !(defined HAVE_M32_MPERS || defined HAVE_MX32_MPERS)
+ static
+@@ -4361,6 +4381,9 @@ const struct xlat elf_em[1] = { {
+ #  endif
+ #  ifdef XLAT_VAL_187
+   | XLAT_VAL_187
++#  endif
++#  ifdef XLAT_VAL_188
++  | XLAT_VAL_188
+ #  endif
+   ,
+  .flags_strsz = 0
+@@ -4927,6 +4950,9 @@ const struct xlat elf_em[1] = { {
+ #  endif
+ #  ifdef XLAT_STR_187
+   + sizeof(XLAT_STR_187)
++#  endif
++#  ifdef XLAT_STR_188
++  + sizeof(XLAT_STR_188)
+ #  endif
+   ,
+ } };
+@@ -5308,6 +5334,8 @@ DIAG_POP_IGNORE_TAUTOLOGICAL_CONSTANT_COMPARE
+ #  undef XLAT_VAL_186
+ #  undef XLAT_STR_187
+ #  undef XLAT_VAL_187
++#  undef XLAT_STR_188
++#  undef XLAT_VAL_188
+ # endif /* !IN_MPERS */
+ 
+ #endif /* !XLAT_MACROS_ONLY */
+diff --git a/src/xlat/elf_em.in b/src/xlat/elf_em.in
+index 6d9bf80..91c7a29 100644
+--- a/src/xlat/elf_em.in
++++ b/src/xlat/elf_em.in
+@@ -201,3 +201,4 @@ EM_S390_OLD		0xa390 /* This is the old interim value for S/390 architecture */
+ EM_XTENSA_OLD		0xabc7 /* arch/xtensa/include/asm/elf.h */
+ EM_MICROBLAZE_OLD	0xbaab /* arch/microblaze/include/uapi/asm/elf.h */
+ EM_CYGNUS_MN10300	0xbeef /* Also Panasonic/MEI MN10300, AM33 */
++EM_PU32			0xdeed /* PU32 */
+-- 
+2.34.1
+

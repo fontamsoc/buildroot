@@ -10,6 +10,7 @@ BUSYBOX_SOURCE = busybox-$(BUSYBOX_VERSION).tar.bz2
 BUSYBOX_LICENSE = GPL-2.0, bzip2-1.0.4
 BUSYBOX_LICENSE_FILES = LICENSE archival/libarchive/bz/LICENSE
 BUSYBOX_CPE_ID_VENDOR = busybox
+BUSYBOX_INSTALL_STAGING = YES
 
 # 0003-libbb-sockaddr2str-ensure-only-printable-characters-.patch
 # 0004-nslookup-sanitize-all-printed-strings-with-printable.patch
@@ -379,6 +380,11 @@ endef
 define BUSYBOX_BUILD_CMDS
 	$(BUSYBOX_MAKE_ENV) $(MAKE) $(BUSYBOX_MAKE_OPTS) -C $(@D)
 endef
+
+define BUSYBOX_INSTALL_STAGING
+	$(INSTALL) -m 0755 $(@D)/busybox_unstripped $(STAGING_DIR)/bin/busybox
+endef
+BUSYBOX_POST_INSTALL_TARGET_HOOKS += BUSYBOX_INSTALL_STAGING
 
 define BUSYBOX_INSTALL_TARGET_CMDS
 	# Use the 'noclobber' install rule, to prevent BusyBox from overwriting

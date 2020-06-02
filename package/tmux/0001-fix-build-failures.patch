@@ -1,0 +1,53 @@
+From c44fcd0f72ef6bca2d06968bd26932fe604c4f03 Mon Sep 17 00:00:00 2001
+From: William Tambe <tambewilliam@gmail.com>
+Date: Thu, 18 May 2023 19:01:35 -0500
+Subject: [PATCH] fix build failures
+
+---
+ compat/getdtablecount.c | 2 ++
+ compat/imsg-buffer.c    | 2 ++
+ tmux.c                  | 2 ++
+ 3 files changed, 6 insertions(+)
+
+diff --git a/compat/getdtablecount.c b/compat/getdtablecount.c
+index 1f9a0aa..9c49d72 100644
+--- a/compat/getdtablecount.c
++++ b/compat/getdtablecount.c
+@@ -14,6 +14,8 @@
+  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  */
+ 
++#include <linux/limits.h>
++
+ #include <sys/types.h>
+ 
+ #include <glob.h>
+diff --git a/compat/imsg-buffer.c b/compat/imsg-buffer.c
+index 67d4c70..0a1fdad 100644
+--- a/compat/imsg-buffer.c
++++ b/compat/imsg-buffer.c
+@@ -16,6 +16,8 @@
+  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  */
+ 
++#include <bits/xopen_lim.h>
++
+ #include <sys/types.h>
+ #include <sys/socket.h>
+ #include <sys/uio.h>
+diff --git a/tmux.c b/tmux.c
+index b9f2be3..93b7098 100644
+--- a/tmux.c
++++ b/tmux.c
+@@ -16,6 +16,8 @@
+  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  */
+ 
++#include <linux/limits.h>
++
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <sys/utsname.h>
+-- 
+2.34.1
+
