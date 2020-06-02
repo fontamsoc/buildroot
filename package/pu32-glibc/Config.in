@@ -1,0 +1,6 @@
+config BR2_PACKAGE_PU32_GLIBC
+	bool "PU32 glibc"
+	depends on BR2_pu32
+	select BR2_PACKAGE_PU32_LINUX_HEADERS
+	help
+	  Install glibc on the target

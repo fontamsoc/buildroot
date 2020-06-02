@@ -1,0 +1,66 @@
+From e6146ab9ab172c1c2ee1a7bd6e34319c43ec13b4 Mon Sep 17 00:00:00 2001
+From: William Tambe <tambewilliam@gmail.com>
+Date: Sun, 6 Nov 2022 19:45:52 -0600
+Subject: [PATCH] fix machine pu32-buildroot not recognized
+
+---
+ isl/config.sub           | 2 ++
+ mpc/build-aux/config.sub | 1 +
+ mpfr/config.sub          | 2 ++
+ 3 files changed, 5 insertions(+)
+
+diff --git a/isl/config.sub b/isl/config.sub
+index 1d8e98bce..fc47c70e5 100755
+--- a/isl/config.sub
++++ b/isl/config.sub
+@@ -299,6 +299,7 @@ case $basic_machine in
+ 	| pdp10 | pj | pjl \
+ 	| powerpc | powerpc64 | powerpc64le | powerpcle \
+ 	| pru \
++	| pu32 \
+ 	| pyramid \
+ 	| riscv32 | riscv64 \
+ 	| rl78 | rx \
+@@ -427,6 +428,7 @@ case $basic_machine in
+ 	| pdp10-* | pdp11-* | pj-* | pjl-* | pn-* | power-* \
+ 	| powerpc-* | powerpc64-* | powerpc64le-* | powerpcle-* \
+ 	| pru-* \
++	| pu32-* \
+ 	| pyramid-* \
+ 	| riscv32-* | riscv64-* \
+ 	| rl78-* | romp-* | rs6000-* | rx-* \
+diff --git a/mpc/build-aux/config.sub b/mpc/build-aux/config.sub
+index a3f11f8f3..857c7b4fc 100755
+--- a/mpc/build-aux/config.sub
++++ b/mpc/build-aux/config.sub
+@@ -1226,6 +1226,7 @@ case $cpu-$vendor in
+ 			| pdp10 | pdp11 | pj | pjl | pn | power \
+ 			| powerpc | powerpc64 | powerpc64le | powerpcle | powerpcspe \
+ 			| pru \
++			| pu32 \
+ 			| pyramid \
+ 			| riscv | riscv32 | riscv64 \
+ 			| rl78 | romp | rs6000 | rx \
+diff --git a/mpfr/config.sub b/mpfr/config.sub
+index 1d8e98bce..fc47c70e5 100755
+--- a/mpfr/config.sub
++++ b/mpfr/config.sub
+@@ -299,6 +299,7 @@ case $basic_machine in
+ 	| pdp10 | pj | pjl \
+ 	| powerpc | powerpc64 | powerpc64le | powerpcle \
+ 	| pru \
++	| pu32 \
+ 	| pyramid \
+ 	| riscv32 | riscv64 \
+ 	| rl78 | rx \
+@@ -427,6 +428,7 @@ case $basic_machine in
+ 	| pdp10-* | pdp11-* | pj-* | pjl-* | pn-* | power-* \
+ 	| powerpc-* | powerpc64-* | powerpc64le-* | powerpcle-* \
+ 	| pru-* \
++	| pu32-* \
+ 	| pyramid-* \
+ 	| riscv32-* | riscv64-* \
+ 	| rl78-* | romp-* | rs6000-* | rx-* \
+-- 
+2.25.1
+

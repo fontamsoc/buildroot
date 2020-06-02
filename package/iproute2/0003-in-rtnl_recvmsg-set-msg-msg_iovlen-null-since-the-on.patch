@@ -1,0 +1,33 @@
+From cc610aba3c083a3643503caf957df1c51847ddd1 Mon Sep 17 00:00:00 2001
+From: William Tambe <tambewilliam@gmail.com>
+Date: Thu, 14 Oct 2021 19:34:14 -0500
+Subject: [PATCH] in rtnl_recvmsg(), set msg->msg_iovlen null since the only
+ iovec is null
+
+---
+ lib/libnetlink.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/lib/libnetlink.c b/lib/libnetlink.c
+index 2f2cc1f..ab60949 100644
+--- a/lib/libnetlink.c
++++ b/lib/libnetlink.c
+@@ -804,10 +804,15 @@ static int rtnl_recvmsg(int fd, struct msghdr *msg, char **answer)
+ 	iov->iov_base = NULL;
+ 	iov->iov_len = 0;
+ 
++	int saved_msg_iovlen = msg->msg_iovlen;
++	msg->msg_iovlen = 0;
++
+ 	len = __rtnl_recvmsg(fd, msg, MSG_PEEK | MSG_TRUNC);
+ 	if (len < 0)
+ 		return len;
+ 
++	msg->msg_iovlen = saved_msg_iovlen;
++
+ 	if (len < 32768)
+ 		len = 32768;
+ 	buf = malloc(len);
+-- 
+2.25.1
+

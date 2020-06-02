@@ -101,24 +101,24 @@ define PPPD_INSTALL_TARGET_CMDS
 		$(INSTALL) -D $(PPPD_DIR)/$$sbin/$$sbin \
 			$(TARGET_DIR)/usr/sbin/$$sbin; \
 	done
-	$(INSTALL) -D $(PPPD_DIR)/pppd/plugins/minconn.so \
-		$(TARGET_DIR)/usr/lib/pppd/$(PPPD_VERSION)/minconn.so
-	$(INSTALL) -D $(PPPD_DIR)/pppd/plugins/passprompt.so \
-		$(TARGET_DIR)/usr/lib/pppd/$(PPPD_VERSION)/passprompt.so
-	$(INSTALL) -D $(PPPD_DIR)/pppd/plugins/passwordfd.so \
-		$(TARGET_DIR)/usr/lib/pppd/$(PPPD_VERSION)/passwordfd.so
-	$(INSTALL) -D $(PPPD_DIR)/pppd/plugins/pppoatm/pppoatm.so \
-		$(TARGET_DIR)/usr/lib/pppd/$(PPPD_VERSION)/pppoatm.so
-	$(INSTALL) -D $(PPPD_DIR)/pppd/plugins/pppoe/pppoe.so \
-		$(TARGET_DIR)/usr/lib/pppd/$(PPPD_VERSION)/pppoe.so
+#	$(INSTALL) -D $(PPPD_DIR)/pppd/plugins/minconn.so \
+#		$(TARGET_DIR)/usr/lib/pppd/$(PPPD_VERSION)/minconn.so
+#	$(INSTALL) -D $(PPPD_DIR)/pppd/plugins/passprompt.so \
+#		$(TARGET_DIR)/usr/lib/pppd/$(PPPD_VERSION)/passprompt.so
+#	$(INSTALL) -D $(PPPD_DIR)/pppd/plugins/passwordfd.so \
+#		$(TARGET_DIR)/usr/lib/pppd/$(PPPD_VERSION)/passwordfd.so
+#	$(INSTALL) -D $(PPPD_DIR)/pppd/plugins/pppoatm/pppoatm.so \
+#		$(TARGET_DIR)/usr/lib/pppd/$(PPPD_VERSION)/pppoatm.so
+#	$(INSTALL) -D $(PPPD_DIR)/pppd/plugins/pppoe/pppoe.so \
+#		$(TARGET_DIR)/usr/lib/pppd/$(PPPD_VERSION)/pppoe.so
 	$(INSTALL) -D $(PPPD_DIR)/pppd/plugins/pppoe/pppoe-discovery \
 		$(TARGET_DIR)/usr/sbin/pppoe-discovery
-	$(INSTALL) -D $(PPPD_DIR)/pppd/plugins/winbind.so \
-		$(TARGET_DIR)/usr/lib/pppd/$(PPPD_VERSION)/winbind.so
-	$(INSTALL) -D $(PPPD_DIR)/pppd/plugins/pppol2tp/openl2tp.so \
-		$(TARGET_DIR)/usr/lib/pppd/$(PPPD_VERSION)/openl2tp.so
-	$(INSTALL) -D $(PPPD_DIR)/pppd/plugins/pppol2tp/pppol2tp.so \
-		$(TARGET_DIR)/usr/lib/pppd/$(PPPD_VERSION)/pppol2tp.so
+#	$(INSTALL) -D $(PPPD_DIR)/pppd/plugins/winbind.so \
+#		$(TARGET_DIR)/usr/lib/pppd/$(PPPD_VERSION)/winbind.so
+#	$(INSTALL) -D $(PPPD_DIR)/pppd/plugins/pppol2tp/openl2tp.so \
+#		$(TARGET_DIR)/usr/lib/pppd/$(PPPD_VERSION)/openl2tp.so
+#	$(INSTALL) -D $(PPPD_DIR)/pppd/plugins/pppol2tp/pppol2tp.so \
+#		$(TARGET_DIR)/usr/lib/pppd/$(PPPD_VERSION)/pppol2tp.so
 	$(INSTALL) -D -m 0755 $(PPPD_DIR)/scripts/pon $(TARGET_DIR)/usr/bin/pon
 	$(INSTALL) -D -m 0755 $(PPPD_DIR)/scripts/poff $(TARGET_DIR)/usr/bin/poff
 	$(PPPD_INSTALL_RADIUS)
