@@ -1,0 +1,34 @@
+From ca279fb9ae5f15cd8610c75bbde2513451b55273 Mon Sep 17 00:00:00 2001
+From: William Tambe <tambewilliam@gmail.com>
+Date: Wed, 7 Dec 2022 20:53:39 -0600
+Subject: [PATCH] disable setlocale()
+
+---
+ tmux.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/tmux.c b/tmux.c
+index 16d1496..a4e8f51 100644
+--- a/tmux.c
++++ b/tmux.c
+@@ -340,7 +340,7 @@ main(int argc, char **argv)
+ 	uint64_t				 flags = 0;
+ 	const struct options_table_entry	*oe;
+ 	u_int					 i;
+-
++#if 0
+ 	if (setlocale(LC_CTYPE, "en_US.UTF-8") == NULL &&
+ 	    setlocale(LC_CTYPE, "C.UTF-8") == NULL) {
+ 		if (setlocale(LC_CTYPE, "") == NULL)
+@@ -352,7 +352,7 @@ main(int argc, char **argv)
+ 
+ 	setlocale(LC_TIME, "");
+ 	tzset();
+-
++#endif
+ 	if (**argv == '-')
+ 		flags = CLIENT_LOGIN;
+ 
+-- 
+2.25.1
+

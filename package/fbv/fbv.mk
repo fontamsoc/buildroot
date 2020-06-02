@@ -15,12 +15,6 @@ FBV_DEPENDENCIES = # empty
 FBV_CONFIGURE_OPTS = # empty
 ifeq ($(BR2_PACKAGE_FBV_PNG),y)
 FBV_DEPENDENCIES += libpng
-
-# libpng in turn depends on other libraries
-ifeq ($(BR2_STATIC_LIBS),y)
-FBV_CONFIGURE_OPTS += "--libs=`$(PKG_CONFIG_HOST_BINARY) --libs libpng`"
-endif
-
 else
 FBV_CONFIGURE_OPTS += --without-libpng
 endif
@@ -33,6 +27,11 @@ ifeq ($(BR2_PACKAGE_FBV_GIF),y)
 FBV_DEPENDENCIES += giflib
 else
 FBV_CONFIGURE_OPTS += --without-libungif
+endif
+
+ifeq ($(BR2_STATIC_LIBS),y)
+# TODO: must be conditional on libpng libjpeg libungif
+FBV_CONFIGURE_OPTS += "--libs=-lm -lz `$(PKG_CONFIG_HOST_BINARY) --libs libpng libjpeg libungif`"
 endif
 
 #fbv doesn't support cross-compilation

@@ -1,0 +1,5 @@
+config BR2_PACKAGE_PU32_LINUX_HEADERS
+	bool "PU32 Linux Kernel Headers"
+	depends on BR2_pu32
+	help
+	  Install headers on the target
