@@ -1,0 +1,24 @@
+From c6b05ac9d64398d8f6eb083b87360dd0f9a969f1 Mon Sep 17 00:00:00 2001
+From: William Tambe <tambewilliam@gmail.com>
+Date: Wed, 22 Jul 2020 00:13:59 -0500
+Subject: [PATCH] package/iproute2: fix lnstat.h
+
+---
+ misc/lnstat.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/misc/lnstat.h b/misc/lnstat.h
+index 199eb54..df5fbe8 100644
+--- a/misc/lnstat.h
++++ b/misc/lnstat.h
+@@ -3,6 +3,7 @@
+ #define _LNSTAT_H
+ 
+ #include <limits.h>
++#include <linux/limits.h>
+ #include <sys/select.h>
+ 
+ #define LNSTAT_VERSION "0.02 041002"
+-- 
+2.25.1
+
