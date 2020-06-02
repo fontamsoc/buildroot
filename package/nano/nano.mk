@@ -19,6 +19,13 @@ NANO_CONF_ENV += ac_cv_prog_NCURSESW_CONFIG=false
 NANO_MAKE_ENV += CURSES_LIB="-lncurses"
 endif
 
+ifeq ($(BR2_PACKAGE_FILE),y)
+NANO_DEPENDENCIES += file
+NANO_CONF_OPTS += --enable-libmagic
+else
+NANO_CONF_OPTS += --disable-libmagic
+endif
+
 ifeq ($(BR2_PACKAGE_NANO_TINY),y)
 NANO_CONF_OPTS += \
 	--enable-tiny \
