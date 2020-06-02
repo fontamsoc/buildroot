@@ -1,0 +1,25 @@
+From 51d0fbc1b648d19213b075dc85a042dbea38da9c Mon Sep 17 00:00:00 2001
+From: William Tambe <tambewilliam@gmail.com>
+Date: Fri, 4 Nov 2022 22:12:12 -0500
+Subject: [PATCH] fix 'log2' is not a member of 'std'
+
+---
+ gdb/dwarf2/index-write.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/gdb/dwarf2/index-write.c b/gdb/dwarf2/index-write.c
+index c3aad8dd..4074b27b 100644
+--- a/gdb/dwarf2/index-write.c
++++ b/gdb/dwarf2/index-write.c
+@@ -595,7 +595,7 @@ class debug_names
+     gdb_assert (m_abbrev_table.empty ());
+     const size_t name_count = m_name_to_value_set.size ();
+     m_bucket_table.resize
+-      (std::pow (2, std::ceil (std::log2 (name_count * 4 / 3))));
++      (std::pow (2, std::ceil (log2 (name_count * 4 / 3))));
+     m_hash_table.reserve (name_count);
+     m_name_table_string_offs.reserve (name_count);
+     m_name_table_entry_offs.reserve (name_count);
+-- 
+2.25.1
+

@@ -35,4 +35,8 @@ endef
 STRACE_POST_INSTALL_TARGET_HOOKS += STRACE_REMOVE_STRACE_GRAPH
 endif
 
+ifeq ($(BR2_STATIC_LIBS),y)
+STRACE_CONF_ENV += LIBS="-lpthread"
+endif
+
 $(eval $(autotools-package))
