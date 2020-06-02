@@ -1,0 +1,43 @@
+From 5721c615d557524f5832311b417d4847ebc55c7d Mon Sep 17 00:00:00 2001
+From: William Tambe <tambewilliam@gmail.com>
+Date: Mon, 25 May 2020 10:52:05 -0500
+Subject: [PATCH] package/htop: fix -fno-common build failure
+
+Patch for fixing build failure when using GCC10 as a host
+compiler (-fno-common is now default)
+---
+ CRT.h | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/CRT.h b/CRT.h
+index 933fe06..8f10c35 100644
+--- a/CRT.h
++++ b/CRT.h
+@@ -140,7 +140,7 @@ extern const char **CRT_treeStr;
+ 
+ extern int CRT_delay;
+ 
+-int* CRT_colors;
++extern int* CRT_colors;
+ 
+ extern int CRT_colorSchemes[LAST_COLORSCHEME][LAST_COLORELEMENT];
+ 
+@@ -150,13 +150,13 @@ extern int CRT_scrollHAmount;
+ 
+ extern int CRT_scrollWheelVAmount;
+ 
+-char* CRT_termType;
++extern char* CRT_termType;
+ 
+ // TODO move color scheme to Settings, perhaps?
+ 
+ extern int CRT_colorScheme;
+ 
+-void *backtraceArray[128];
++extern void *backtraceArray[128];
+ 
+ #if HAVE_SETUID_ENABLED
+ 
+-- 
+2.25.1
+
