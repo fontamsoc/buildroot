@@ -45,4 +45,9 @@ NANO_CONF_OPTS += --disable-libmagic --disable-libmagic --disable-color
 endif # BR2_PACKAGE_FILE
 endif # BR2_PACKAGE_NANO_TINY
 
+define NANO_INSTALL_NANORC
+	$(INSTALL) -m 0644 package/nano/nanorc $(TARGET_DIR)/etc/nanorc
+endef
+NANO_POST_INSTALL_TARGET_HOOKS += NANO_INSTALL_NANORC
+
 $(eval $(autotools-package))
