@@ -21,7 +21,7 @@ GDB_FROM_GIT = y
 endif
 
 ifeq ($(BR2_pu32),y)
-GDB_VERSION = pu32.20211205.0
+GDB_VERSION = pu32.20220920
 GDB_SITE = $(call github,fontamsoc,binutils-gdb,$(GDB_VERSION))
 GDB_SOURCE = $(GDB_VERSION).tar.gz
 GDB_FROM_GIT = y
