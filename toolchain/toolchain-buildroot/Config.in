@@ -102,6 +102,7 @@ endchoice
 
 config BR2_TOOLCHAIN_BUILDROOT_LIBC
 	string
+	depends on !BR2_pu32
 	default "uclibc" if BR2_TOOLCHAIN_BUILDROOT_UCLIBC
 	default "glibc"  if BR2_TOOLCHAIN_BUILDROOT_GLIBC
 	default "musl"	 if BR2_TOOLCHAIN_BUILDROOT_MUSL
@@ -115,3 +116,5 @@ source "package/binutils/Config.in.host"
 source "package/gcc/Config.in.host"
 source "package/elf2flt/Config.in.host"
 endif
+
+source "package/pu32-glibc/Config.in"
