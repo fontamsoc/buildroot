@@ -117,4 +117,5 @@ source "package/gcc/Config.in.host"
 source "package/elf2flt/Config.in.host"
 endif
 
+source "package/pu32-linux-headers/Config.in"
 source "package/pu32-glibc/Config.in"
