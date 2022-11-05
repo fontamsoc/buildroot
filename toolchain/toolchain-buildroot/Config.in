@@ -119,3 +119,4 @@ endif
 
 source "package/pu32-linux-headers/Config.in"
 source "package/pu32-glibc/Config.in"
+source "package/pu32-binutils/Config.in"
