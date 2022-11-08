@@ -1,0 +1,7 @@
+config BR2_PACKAGE_PU32_GCC
+	bool "PU32 gcc"
+	depends on BR2_pu32
+	select BR2_PACKAGE_PU32_BINUTILS
+	select BR2_PACKAGE_PU32_GLIBC
+	help
+	  Install gcc on the target
