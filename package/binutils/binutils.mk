@@ -27,13 +27,6 @@ BINUTILS_SOURCE = binutils-$(BINUTILS_VERSION).tar.gz
 BINUTILS_FROM_GIT = y
 endif
 
-ifeq ($(BR2_pu32),y)
-BINUTILS_VERSION = pu32.20221031
-BINUTILS_SITE = $(call github,fontamsoc,binutils-gdb,$(BINUTILS_VERSION))
-BINUTILS_SOURCE = $(BINUTILS_VERSION).tar.gz
-BINUTILS_FROM_GIT = y
-endif
-
 BINUTILS_SITE ?= $(BR2_GNU_MIRROR)/binutils
 BINUTILS_SOURCE ?= binutils-$(BINUTILS_VERSION).tar.xz
 BINUTILS_EXTRA_CONFIG_OPTIONS = $(call qstrip,$(BR2_BINUTILS_EXTRA_CONFIG_OPTIONS))
@@ -64,6 +57,7 @@ BINUTILS_CONF_OPTS = \
 	--target=$(GNU_TARGET_NAME) \
 	--enable-install-libiberty \
 	--enable-build-warnings=no \
+	--with-system-zlib \
 	$(BINUTILS_DISABLE_GDB_CONF_OPTS) \
 	$(BINUTILS_EXTRA_CONFIG_OPTIONS)
 
