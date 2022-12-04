@@ -586,8 +586,6 @@ define $(2)_CONFIGURE_CMDS
 	elif test "$$(BR2_TOOLCHAIN_EXTERNAL_MUSL)" = "y" ; then \
 		$$(call check_musl,\
 			"$$(TOOLCHAIN_EXTERNAL_CC) $$(TOOLCHAIN_EXTERNAL_CFLAGS)") ; \
-	else \
-		$$(call check_glibc,$$$${SYSROOT_DIR}) ; \
 	fi
 endef
 
