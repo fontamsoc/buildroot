@@ -1,0 +1,53 @@
+From e50558cdbc0068c525152414035ea7927b186e13 Mon Sep 17 00:00:00 2001
+From: William Tambe <tambewilliam@gmail.com>
+Date: Mon, 5 Dec 2022 18:40:28 -0600
+Subject: [PATCH] fix build errors
+
+---
+ compat/getdtablecount.c | 2 ++
+ compat/imsg-buffer.c    | 2 ++
+ tmux.c                  | 2 ++
+ 3 files changed, 6 insertions(+)
+
+diff --git a/compat/getdtablecount.c b/compat/getdtablecount.c
+index 1f9a0aa..3e8d26f 100644
+--- a/compat/getdtablecount.c
++++ b/compat/getdtablecount.c
+@@ -19,6 +19,8 @@
+ #include <glob.h>
+ #include <unistd.h>
+ 
++#include <linux/limits.h>
++
+ #include "compat.h"
+ 
+ void fatal(const char *, ...);
+diff --git a/compat/imsg-buffer.c b/compat/imsg-buffer.c
+index 814591f..e059c20 100644
+--- a/compat/imsg-buffer.c
++++ b/compat/imsg-buffer.c
+@@ -26,6 +26,8 @@
+ #include <string.h>
+ #include <unistd.h>
+ 
++#include <bits/xopen_lim.h>
++
+ #include "compat.h"
+ #include "imsg.h"
+ 
+diff --git a/tmux.c b/tmux.c
+index 3c1fecc..23d33d8 100644
+--- a/tmux.c
++++ b/tmux.c
+@@ -31,6 +31,8 @@
+ #include <time.h>
+ #include <unistd.h>
+ 
++#include <linux/limits.h>
++
+ #include "tmux.h"
+ 
+ struct options	*global_options;	/* server options */
+-- 
+2.25.1
+
