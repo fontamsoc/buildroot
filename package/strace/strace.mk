@@ -4,13 +4,14 @@
 #
 ################################################################################
 
-STRACE_VERSION = 6.4
+STRACE_VERSION = 6.5
 STRACE_SOURCE = strace-$(STRACE_VERSION).tar.xz
 STRACE_SITE = https://github.com/strace/strace/releases/download/v$(STRACE_VERSION)
 STRACE_LICENSE = LGPL-2.1+
 STRACE_LICENSE_FILES = COPYING LGPL-2.1-or-later
 STRACE_CPE_ID_VENDOR = strace_project
 STRACE_CONF_OPTS = --enable-mpers=no
+# --enable-bundled # to use when kernel is too new.
 
 ifeq ($(BR2_PACKAGE_LIBUNWIND),y)
 STRACE_DEPENDENCIES += libunwind
