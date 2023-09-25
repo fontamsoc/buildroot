@@ -4,11 +4,11 @@
 #
 ################################################################################
 
-PU32_BINUTILS_VERSION = pu32.20221031
+PU32_BINUTILS_VERSION = pu32.20230923
 PU32_BINUTILS_SITE = $(call github,fontamsoc,binutils-gdb,$(PU32_BINUTILS_VERSION))
 PU32_BINUTILS_SOURCE = $(PU32_BINUTILS_VERSION).tar.gz
 
-PU32_BINUTILS_DEPENDENCIES = expat gmp
+PU32_BINUTILS_DEPENDENCIES = expat gmp mpfr
 
 PU32_BINUTILS_SUBDIR = pu32-build
 
