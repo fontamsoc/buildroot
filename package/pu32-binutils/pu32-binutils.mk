@@ -31,6 +31,7 @@ define PU32_BINUTILS_CONFIGURE_CMDS
 		--libexecdir=/opt/toolchain/lib \
 		--with-expat \
 		--disable-nls \
+		--disable-gdbserver \
 		--disable-sim \
 		--disable-tui \
 		--disable-plugins \

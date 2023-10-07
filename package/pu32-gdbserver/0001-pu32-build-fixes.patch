@@ -1,0 +1,63 @@
+From e884578dbe03f220d5db1072a7bab331fb5a2029 Mon Sep 17 00:00:00 2001
+From: William Tambe <tambewilliam@gmail.com>
+Date: Sun, 24 Sep 2023 13:51:28 -0500
+Subject: [PATCH] pu32 build fixes
+
+---
+ gdb/Makefile.in               | 2 +-
+ gdbsupport/common-defs.h      | 3 +++
+ gnulib/import/sys_select.in.h | 4 ++--
+ 3 files changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/gdb/Makefile.in b/gdb/Makefile.in
+index ee93964b..ae820dbf 100644
+--- a/gdb/Makefile.in
++++ b/gdb/Makefile.in
+@@ -653,7 +653,7 @@ INTERNAL_LDFLAGS = \
+ CLIBS = $(SIM) $(READLINE) $(OPCODES) $(LIBCTF) $(BFD) $(ZLIB) $(ZSTD_LIBS) \
+         $(LIBSUPPORT) $(INTL) $(LIBIBERTY) $(LIBDECNUMBER) \
+ 	$(XM_CLIBS) $(GDBTKLIBS)  $(LIBBACKTRACE_LIB) \
+-	@LIBS@ @GUILE_LIBS@ @PYTHON_LIBS@ \
++	@LIBS@ -latomic @GUILE_LIBS@ @PYTHON_LIBS@ \
+ 	$(LIBEXPAT) $(LIBLZMA) $(LIBBABELTRACE) $(LIBIPT) \
+ 	$(WIN32LIBS) $(LIBGNU) $(LIBGNU_EXTRA_LIBS) $(LIBICONV) \
+ 	$(GMPLIBS) $(SRCHIGH_LIBS) $(LIBXXHASH) $(PTHREAD_LIBS) \
+diff --git a/gdbsupport/common-defs.h b/gdbsupport/common-defs.h
+index e4985332..ed5ac2ad 100644
+--- a/gdbsupport/common-defs.h
++++ b/gdbsupport/common-defs.h
+@@ -20,6 +20,9 @@
+ #ifndef COMMON_COMMON_DEFS_H
+ #define COMMON_COMMON_DEFS_H
+ 
++#define _GNU_SOURCE 1
++#include <sys/types.h>
++
+ #include <gdbsupport/config.h>
+ 
+ #undef PACKAGE_NAME
+diff --git a/gnulib/import/sys_select.in.h b/gnulib/import/sys_select.in.h
+index 2bd0e0f7..c980fcf3 100644
+--- a/gnulib/import/sys_select.in.h
++++ b/gnulib/import/sys_select.in.h
+@@ -261,7 +261,7 @@ rpl_fd_isset (SOCKET fd, fd_set * set)
+ #endif
+ 
+ 
+-#if @GNULIB_PSELECT@
++#if 0
+ # if @REPLACE_PSELECT@
+ #  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
+ #   undef pselect
+@@ -296,7 +296,7 @@ _GL_WARN_ON_USE (pselect, "pselect is not portable - "
+ # endif
+ #endif
+ 
+-#if @GNULIB_SELECT@
++#if 0
+ # if @REPLACE_SELECT@
+ #  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
+ #   undef select
+-- 
+2.34.1
+

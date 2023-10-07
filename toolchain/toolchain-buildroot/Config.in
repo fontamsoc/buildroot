@@ -114,6 +114,7 @@ source "package/binutils/Config.in.host"
 source "package/gcc/Config.in.host"
 endif
 
+source "package/pu32-gdbserver/Config.in"
 source "package/pu32-linux-headers/Config.in"
 source "package/pu32-glibc/Config.in"
 source "package/pu32-binutils/Config.in"
